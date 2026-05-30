@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import RotatingAlsoPlay from "./RotatingAlsoPlay";
 
 const LS = {
   streak:       "bl-streak",
@@ -17,12 +18,6 @@ const SCORING: [string, string, string][] = [
   ["<7,000", "LEARNING TO GROW", "par + 7+"],
 ];
 
-const ALSO_PLAY = [
-  { label: "DailyGuessr",    url: "https://dailyguessr.app",        desc: "Daily geography quiz" },
-  { label: "FlagGuessr",     url: "https://flagguessr.app",         desc: "Guess the flag" },
-  { label: "CocktailGuessr", url: "https://cocktailguessr.app",     desc: "Identify the cocktail" },
-  { label: "Palette",        url: "https://palette.stoop.games",    desc: "Daily colour match" },
-];
 
 export default function Sidebar() {
   const [streak, setStreak]           = useState(0);
@@ -107,22 +102,7 @@ export default function Sidebar() {
       {/* Also Play */}
       <div className="px-5 py-4 shrink-0">
         <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Also Play</h2>
-        <div className="space-y-2">
-          {ALSO_PLAY.map(game => (
-            <a key={game.url} href={game.url}
-              className="flex items-center justify-between p-3 rounded-lg bg-[var(--paper)] border border-dashed border-[rgba(42,31,21,0.18)] no-underline group"
-              style={{ textDecoration: "none" }}
-            >
-              <div>
-                <div className="text-xs font-semibold text-[#2a1f15] font-mono group-hover:text-[#c45a3a] transition-colors">
-                  {game.label}
-                </div>
-                <div className="text-xs text-[#8a7355] mt-0.5">{game.desc}</div>
-              </div>
-              <span className="text-[#8a7355] text-xs group-hover:text-[#c45a3a] transition-colors">→</span>
-            </a>
-          ))}
-        </div>
+        <RotatingAlsoPlay />
       </div>
 
     </aside>
