@@ -2,21 +2,28 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Color, floodFill, isSolved } from "@/lib/grid";
 import { calculatePar } from "@/lib/par";
-import { getDailyGrid, getPracticeGrid, getTodayKey, getPuzzleNumber } from "@/lib/daily";
+import { getDailyGrid, getLevelGrid, getTodayKey, getPuzzleNumber } from "@/lib/daily";
 import GameGrid from "./GameGrid";
 import ColorPicker from "./ColorPicker";
 import MoveCounter from "./MoveCounter";
 import ResultsOverlay from "./ResultsOverlay";
 
-type Mode = "daily" | "practice";
+type Mode = "daily" | "levels";
+
+interface Props {
+  levelN: number;
+  onLevelChange: (n: number) => void;
+  onLevelWin?: () => void;
+}
 
 const LS = {
-  state:       (key: string) => `bl-state-${key}`,
-  streak:      "bl-streak",
-  bestStreak:  "bl-best-streak",
-  bestScore:   "bl-best-score",
-  gamesPlayed: "bl-games-played",
-  practiceBest:"bl-practice-best",
+  state:      (key: string) => `bl-state-${key}`,
+  streak:     "bl-streak",
+  bestStreak: "bl-best-streak",
+  bestScore:  "bl-best-score",
+  gamesPlayed:"bl-games-played",
+  levelsBest: "bl-levels-best",
+  levelDone:  (n: number) => `bl-level-done-${n}`,
 };
 
 function calcScore(moves: number, par: number) {
@@ -29,9 +36,8 @@ function getYesterdayKey(): string {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-export default function GameClient() {
+export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props) {
   const [mode, setMode] = useState<Mode>("daily");
-  const [practiceN, setPracticeN] = useState(1);
   const [grid, setGrid] = useState<Color[][]>([]);
   const [territory, setTerritory] = useState<Set<string>>(new Set(["0-0"]));
   const [moves, setMoves] = useState(0);
@@ -40,37 +46,35 @@ export default function GameClient() {
   const [showResults, setShowResults] = useState(false);
   const [dailyDone, setDailyDone] = useState(false);
 
-  // Animation state
   const [newCells, setNewCells] = useState<Map<string, number>>(new Map());
   const [animating, setAnimating] = useState(false);
   const [winPhase, setWinPhase] = useState(false);
 
-  // Stats
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [gamesPlayed, setGamesPlayed] = useState(0);
-  const [practiceBest, setPracticeBest] = useState(0);
+  const [levelsBest, setLevelsBest] = useState(0);
 
-  // Always-current snapshot for handleMove (avoids stale closures)
   const stateRef = useRef({
     grid, territory, moves, par, mode, gameOver, animating,
-    streak, bestStreak, bestScore, gamesPlayed, practiceBest,
+    streak, bestStreak, bestScore, gamesPlayed, levelsBest, levelN,
+    onLevelWin,
   });
   useEffect(() => {
     stateRef.current = {
       grid, territory, moves, par, mode, gameOver, animating,
-      streak, bestStreak, bestScore, gamesPlayed, practiceBest,
+      streak, bestStreak, bestScore, gamesPlayed, levelsBest, levelN,
+      onLevelWin,
     };
   });
 
-  // Load stats & daily state from localStorage on mount
   useEffect(() => {
     setStreak(parseInt(localStorage.getItem(LS.streak) || "0"));
     setBestStreak(parseInt(localStorage.getItem(LS.bestStreak) || "0"));
     setBestScore(parseInt(localStorage.getItem(LS.bestScore) || "0"));
     setGamesPlayed(parseInt(localStorage.getItem(LS.gamesPlayed) || "0"));
-    setPracticeBest(parseInt(localStorage.getItem(LS.practiceBest) || "0"));
+    setLevelsBest(parseInt(localStorage.getItem(LS.levelsBest) || "0"));
 
     const key = getTodayKey();
     const saved = localStorage.getItem(LS.state(key));
@@ -79,9 +83,8 @@ export default function GameClient() {
     }
   }, []);
 
-  // Init / reset game when mode or practiceN changes
   useEffect(() => {
-    const baseGrid = mode === "daily" ? getDailyGrid() : getPracticeGrid(practiceN);
+    const baseGrid = mode === "daily" ? getDailyGrid() : getLevelGrid(levelN);
 
     if (mode === "daily") {
       const key = getTodayKey();
@@ -112,7 +115,7 @@ export default function GameClient() {
     setNewCells(new Map());
     setAnimating(false);
     setWinPhase(false);
-  }, [mode, practiceN]);
+  }, [mode, levelN]);
 
   const handleMove = useCallback((color: Color) => {
     const s = stateRef.current;
@@ -127,7 +130,6 @@ export default function GameClient() {
     setNewCells(waveDepths);
     setAnimating(true);
 
-    // Clear bloom animation after it finishes
     const maxDepth = waveDepths.size > 0 ? Math.max(...waveDepths.values()) : 0;
     const bloomDuration = Math.min(maxDepth * 15, 280) + 120;
 
@@ -141,7 +143,6 @@ export default function GameClient() {
 
     if (solved) {
       setGameOver(true);
-      // Overlay fades in 600ms after win
       setTimeout(() => setShowResults(true), 600);
 
       const score = calcScore(newMoves, s.par);
@@ -168,9 +169,11 @@ export default function GameClient() {
         localStorage.setItem(LS.bestScore, String(newBestScore));
         setBestScore(newBestScore);
       } else {
-        const newPracticeBest = Math.max(s.practiceBest, score);
-        localStorage.setItem(LS.practiceBest, String(newPracticeBest));
-        setPracticeBest(newPracticeBest);
+        localStorage.setItem(LS.levelDone(s.levelN), "true");
+        const newLevelsBest = Math.max(s.levelsBest, score);
+        localStorage.setItem(LS.levelsBest, String(newLevelsBest));
+        setLevelsBest(newLevelsBest);
+        s.onLevelWin?.();
       }
 
       const newGamesPlayed = s.gamesPlayed + 1;
@@ -207,7 +210,7 @@ export default function GameClient() {
         letterSpacing: "0.1em",
         textTransform: "uppercase",
       }}>
-        {(["daily", "practice"] as Mode[]).map(m => (
+        {(["daily", "levels"] as Mode[]).map(m => (
           <button key={m} onClick={() => setMode(m)} style={{
             padding: "8px 20px",
             background: mode === m ? "var(--terracotta, #c45a3a)" : "transparent",
@@ -229,7 +232,7 @@ export default function GameClient() {
       }}>
         {mode === "daily"
           ? `Bloom #${String(getPuzzleNumber()).padStart(3, "0")}`
-          : `Practice #${practiceN}`}
+          : `Level #${String(levelN).padStart(3, "0")}`}
       </div>
 
       <GameGrid
@@ -246,21 +249,6 @@ export default function GameClient() {
         onPick={handleMove}
         disabled={gameOver || animating}
       />
-
-      {mode === "practice" && (
-        <button onClick={() => setPracticeN(n => n + 1)} style={{
-          background: "transparent",
-          border: "1px dashed rgba(42,31,21,0.18)",
-          borderRadius: 8,
-          padding: "10px 24px",
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: 11,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          color: "var(--ink-soft, #5a4632)",
-          cursor: "pointer",
-        }}>New puzzle</button>
-      )}
 
       {mode === "daily" && dailyDone && !showResults && (
         <button onClick={() => setShowResults(true)} style={{
@@ -281,9 +269,12 @@ export default function GameClient() {
         <ResultsOverlay
           moves={moves}
           par={par}
-          puzzleNumber={getPuzzleNumber()}
+          puzzleNumber={mode === "daily" ? getPuzzleNumber() : levelN}
           mode={mode}
           onClose={() => setShowResults(false)}
+          onNextLevel={mode === "levels"
+            ? () => { setShowResults(false); onLevelChange(levelN + 1); }
+            : undefined}
         />
       )}
     </div>

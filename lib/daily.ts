@@ -20,6 +20,6 @@ export function getDailyGrid(): Color[][] {
   return generateGrid(getTodayKey());
 }
 
-export function getPracticeGrid(n: number): Color[][] {
-  return generateGrid(`practice-${n}`);
+export function getLevelGrid(n: number): Color[][] {
+  return generateGrid(`level-${n}`);
 }

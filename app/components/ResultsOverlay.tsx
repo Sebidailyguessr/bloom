@@ -4,8 +4,9 @@ interface Props {
   moves: number;
   par: number;
   puzzleNumber: number;
-  mode: "daily" | "practice";
+  mode: "daily" | "levels";
   onClose?: () => void;
+  onNextLevel?: () => void;
 }
 
 function getLabel(score: number): string {
@@ -20,13 +21,12 @@ function getScore(moves: number, par: number): number {
   return Math.max(0, 10000 - (moves - par) * 500);
 }
 
-export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose }: Props) {
+export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose, onNextLevel }: Props) {
   const score = getScore(moves, par);
   const label = getLabel(score);
 
-  const shareText = mode === "daily"
-    ? `🌸 Bloom #${String(puzzleNumber).padStart(3, "0")}\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`
-    : `🌸 Bloom (Practice)\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`;
+  const shareText =
+    `🌸 Bloom #${String(puzzleNumber).padStart(3, "0")}\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`;
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -62,11 +62,11 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
           marginBottom: 4,
         }}>🌸 Bloom</div>
 
-        {mode === "daily" && (
-          <div style={{ fontSize: 11, color: "var(--ink-faded)", letterSpacing: "0.1em", marginBottom: 20 }}>
-            #{String(puzzleNumber).padStart(3, "0")}
-          </div>
-        )}
+        <div style={{ fontSize: 11, color: "var(--ink-faded)", letterSpacing: "0.1em", marginBottom: 20 }}>
+          {mode === "daily"
+            ? `#${String(puzzleNumber).padStart(3, "0")}`
+            : `Level #${String(puzzleNumber).padStart(3, "0")}`}
+        </div>
 
         <div style={{
           fontSize: 13,
@@ -87,20 +87,37 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
           {moves} moves · par {par}
         </div>
 
-        <button onClick={handleShare} style={{
-          background: "var(--terracotta, #c45a3a)",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          padding: "12px 28px",
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: 12,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          cursor: "pointer",
-          width: "100%",
-          marginBottom: 10,
-        }}>Share result</button>
+        {mode === "levels" && onNextLevel ? (
+          <button onClick={onNextLevel} style={{
+            background: "var(--terracotta, #c45a3a)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "12px 28px",
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: 12,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            width: "100%",
+            marginBottom: 10,
+          }}>Next Level →</button>
+        ) : (
+          <button onClick={handleShare} style={{
+            background: "var(--terracotta, #c45a3a)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "12px 28px",
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: 12,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            width: "100%",
+            marginBottom: 10,
+          }}>Share result</button>
+        )}
 
         {onClose && (
           <button onClick={onClose} style={{

@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react";
 import RotatingAlsoPlay from "./RotatingAlsoPlay";
 
+const TOTAL_LEVELS = 300;
+
 const LS = {
-  streak:       "bl-streak",
-  bestStreak:   "bl-best-streak",
-  bestScore:    "bl-best-score",
-  gamesPlayed:  "bl-games-played",
-  practiceBest: "bl-practice-best",
+  streak:      "bl-streak",
+  bestStreak:  "bl-best-streak",
+  bestScore:   "bl-best-score",
+  gamesPlayed: "bl-games-played",
+  levelDone:   (n: number) => `bl-level-done-${n}`,
 };
 
 const SCORING: [string, string, string][] = [
@@ -18,18 +20,29 @@ const SCORING: [string, string, string][] = [
   ["<7,000", "LEARNING TO GROW", "par + 7+"],
 ];
 
+interface Props {
+  levelN: number;
+  onLevelSelect: (n: number) => void;
+}
 
-export default function Sidebar() {
+export default function Sidebar({ levelN, onLevelSelect }: Props) {
   const [streak, setStreak]           = useState(0);
   const [bestStreak, setBestStreak]   = useState(0);
   const [bestScore, setBestScore]     = useState(0);
   const [gamesPlayed, setGamesPlayed] = useState(0);
+  const [doneLevels, setDoneLevels]   = useState<Set<number>>(new Set());
 
   useEffect(() => {
     setStreak(parseInt(localStorage.getItem(LS.streak) || "0"));
     setBestStreak(parseInt(localStorage.getItem(LS.bestStreak) || "0"));
     setBestScore(parseInt(localStorage.getItem(LS.bestScore) || "0"));
     setGamesPlayed(parseInt(localStorage.getItem(LS.gamesPlayed) || "0"));
+
+    const done = new Set<number>();
+    for (let n = 1; n <= TOTAL_LEVELS; n++) {
+      if (localStorage.getItem(LS.levelDone(n)) === "true") done.add(n);
+    }
+    setDoneLevels(done);
   }, []);
 
   return (
@@ -68,6 +81,47 @@ export default function Sidebar() {
         )}
       </div>
 
+      {/* Levels */}
+      <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
+        <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Levels</h2>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(10, 14px)",
+          gap: 3,
+          maxHeight: 200,
+          overflowY: "auto",
+        }}>
+          {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
+            const isDone = doneLevels.has(n);
+            const isCurrent = n === levelN;
+            return (
+              <button
+                key={n}
+                onClick={() => onLevelSelect(n)}
+                title={`Level ${n}${isDone ? " ✓" : isCurrent ? " (current)" : ""}`}
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: 3,
+                  background: (isDone || isCurrent) ? "#c45a3a" : "rgba(42,31,21,0.1)",
+                  opacity: (isCurrent && !isDone) ? 0.5 : 1,
+                  outline: isCurrent ? "2px solid #c45a3a" : "none",
+                  outlineOffset: 1,
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  flexShrink: 0,
+                }}
+              />
+            );
+          })}
+        </div>
+        <p className="text-xs mt-2 font-mono">
+          <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
+          <span style={{ color: "#8a7355" }}> / {TOTAL_LEVELS} completed</span>
+        </p>
+      </div>
+
       {/* How to Play */}
       <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
         <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">How to Play</h2>
@@ -85,7 +139,6 @@ export default function Sidebar() {
           ))}
         </ol>
 
-        {/* Scoring table */}
         <div className="bg-[var(--paper)] rounded-xl p-3 border border-dashed border-[rgba(42,31,21,0.18)]">
           <p className="text-[#5a4632] text-xs font-semibold uppercase tracking-widest mb-2 font-mono">Scoring</p>
           <div className="space-y-1">
