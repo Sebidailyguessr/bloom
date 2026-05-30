@@ -27,6 +27,12 @@ const GAMES = [
     url: 'https://palette.stoop.games',
     emoji: '🎨',
   },
+  {
+    name: 'Sortl',
+    description: 'Sort coloured liquids into pure test tubes',
+    url: 'https://sortl.stoop.games',
+    emoji: '🧪',
+  },
 ]
 
 export default function RotatingAlsoPlay() {
