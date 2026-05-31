@@ -23,9 +23,10 @@ const SCORING: [string, string, string][] = [
 interface Props {
   levelN: number;
   onLevelSelect: (n: number) => void;
+  mode: 'daily' | 'levels';
 }
 
-export default function Sidebar({ levelN, onLevelSelect }: Props) {
+export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
   const [streak, setStreak]           = useState(0);
   const [bestStreak, setBestStreak]   = useState(0);
   const [bestScore, setBestScore]     = useState(0);
@@ -54,72 +55,78 @@ export default function Sidebar({ levelN, onLevelSelect }: Props) {
           Bloom
         </span>
         <p className="text-[#8a7355] text-xs mt-0.5 font-mono">
-          Fill the grid in as few moves as possible.
+          {mode === 'daily'
+            ? 'Fill the grid in as few moves as possible.'
+            : `Level ${levelN} · 300 levels. No limits.`}
         </p>
       </div>
 
-      {/* Your Stats */}
-      <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
-        <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Your Stats</h2>
-        {gamesPlayed === 0 ? (
-          <p className="text-[#8a7355] text-xs">Play your first game to see stats</p>
-        ) : (
-          <div className="space-y-2.5">
-            {([
-              ["🔥", "Streak",       `${streak} day${streak !== 1 ? "s" : ""}`],
-              ["⚡", "Best streak",  `${bestStreak} day${bestStreak !== 1 ? "s" : ""}`],
-              ["🌸", "Best score",   bestScore.toLocaleString()],
-              ["📅", "Games played", String(gamesPlayed)],
-            ] as [string, string, string][]).map(([icon, label, value]) => (
-              <div key={label} className="flex items-center justify-between text-sm">
-                <span className="text-[#5a4632]">{icon} {label}</span>
-                <span className="text-[#2a1f15] font-semibold tabular-nums">{value}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Levels */}
-      <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
-        <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Levels</h2>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(10, 14px)",
-          gap: 3,
-          maxHeight: 200,
-          overflowY: "auto",
-        }}>
-          {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
-            const isDone = doneLevels.has(n);
-            const isCurrent = n === levelN;
-            return (
-              <button
-                key={n}
-                onClick={() => onLevelSelect(n)}
-                title={`Level ${n}${isDone ? " ✓" : isCurrent ? " (current)" : ""}`}
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 3,
-                  background: (isDone || isCurrent) ? "#c45a3a" : "rgba(42,31,21,0.1)",
-                  opacity: (isCurrent && !isDone) ? 0.5 : 1,
-                  outline: isCurrent ? "2px solid #c45a3a" : "none",
-                  outlineOffset: 1,
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0,
-                  flexShrink: 0,
-                }}
-              />
-            );
-          })}
+      {/* Your Stats — daily only */}
+      {mode === 'daily' && (
+        <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
+          <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Your Stats</h2>
+          {gamesPlayed === 0 ? (
+            <p className="text-[#8a7355] text-xs">Play your first game to see stats</p>
+          ) : (
+            <div className="space-y-2.5">
+              {([
+                ["🔥", "Streak",       `${streak} day${streak !== 1 ? "s" : ""}`],
+                ["⚡", "Best streak",  `${bestStreak} day${bestStreak !== 1 ? "s" : ""}`],
+                ["🌸", "Best score",   bestScore.toLocaleString()],
+                ["📅", "Games played", String(gamesPlayed)],
+              ] as [string, string, string][]).map(([icon, label, value]) => (
+                <div key={label} className="flex items-center justify-between text-sm">
+                  <span className="text-[#5a4632]">{icon} {label}</span>
+                  <span className="text-[#2a1f15] font-semibold tabular-nums">{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <p className="text-xs mt-2 font-mono">
-          <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
-          <span style={{ color: "#8a7355" }}> / {TOTAL_LEVELS} completed</span>
-        </p>
-      </div>
+      )}
+
+      {/* Levels grid — levels only */}
+      {mode === 'levels' && (
+        <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
+          <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Levels</h2>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(10, 14px)",
+            gap: 3,
+            maxHeight: 200,
+            overflowY: "auto",
+          }}>
+            {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
+              const isDone = doneLevels.has(n);
+              const isCurrent = n === levelN;
+              return (
+                <button
+                  key={n}
+                  onClick={() => onLevelSelect(n)}
+                  title={`Level ${n}${isDone ? " ✓" : isCurrent ? " (current)" : ""}`}
+                  style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: 3,
+                    background: (isDone || isCurrent) ? "#c45a3a" : "rgba(42,31,21,0.1)",
+                    opacity: (isCurrent && !isDone) ? 0.5 : 1,
+                    outline: isCurrent ? "2px solid #c45a3a" : "none",
+                    outlineOffset: 1,
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    flexShrink: 0,
+                  }}
+                />
+              );
+            })}
+          </div>
+          <p className="text-xs mt-2 font-mono">
+            <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
+            <span style={{ color: "#8a7355" }}> / {TOTAL_LEVELS} completed</span>
+          </p>
+        </div>
+      )}
 
       {/* How to Play */}
       <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
@@ -138,18 +145,21 @@ export default function Sidebar({ levelN, onLevelSelect }: Props) {
           ))}
         </ol>
 
-        <div className="bg-[var(--paper)] rounded-xl p-3 border border-dashed border-[rgba(42,31,21,0.18)]">
-          <p className="text-[#5a4632] text-xs font-semibold uppercase tracking-widest mb-2 font-mono">Scoring</p>
-          <div className="space-y-1">
-            {SCORING.map(([condition, pts, label]) => (
-              <div key={pts} className="flex items-center text-xs gap-2">
-                <span className="text-[#8a7355] w-20 shrink-0 font-mono">{condition}</span>
-                <span className="text-[#2a1f15] font-semibold tabular-nums w-14 font-mono">{pts}</span>
-                <span className="text-[#8a7355]">{label}</span>
-              </div>
-            ))}
+        {/* Scoring table — daily only */}
+        {mode === 'daily' && (
+          <div className="bg-[var(--paper)] rounded-xl p-3 border border-dashed border-[rgba(42,31,21,0.18)]">
+            <p className="text-[#5a4632] text-xs font-semibold uppercase tracking-widest mb-2 font-mono">Scoring</p>
+            <div className="space-y-1">
+              {SCORING.map(([condition, pts, label]) => (
+                <div key={pts} className="flex items-center text-xs gap-2">
+                  <span className="text-[#8a7355] w-20 shrink-0 font-mono">{condition}</span>
+                  <span className="text-[#2a1f15] font-semibold tabular-nums w-14 font-mono">{pts}</span>
+                  <span className="text-[#8a7355]">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Also Play */}

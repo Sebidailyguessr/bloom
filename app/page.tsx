@@ -8,6 +8,7 @@ const TOTAL_LEVELS = 300;
 export default function HomePage() {
   const [levelN, setLevelN] = useState(1);
   const [sidebarKey, setSidebarKey] = useState(0);
+  const [mode, setMode] = useState<'daily' | 'levels'>('daily');
 
   useEffect(() => {
     const saved = parseInt(localStorage.getItem("bl-current-level") || "1");
@@ -18,6 +19,7 @@ export default function HomePage() {
     const clamped = Math.min(Math.max(1, n), TOTAL_LEVELS);
     localStorage.setItem("bl-current-level", String(clamped));
     setLevelN(clamped);
+    setMode('levels');
     setSidebarKey(k => k + 1);
   };
 
@@ -35,13 +37,14 @@ export default function HomePage() {
             levelN={levelN}
             onLevelChange={handleLevelChange}
             onLevelWin={handleLevelWin}
+            onModeChange={setMode}
           />
         </div>
       </div>
 
       {/* Sidebar — key forces remount after win so stats refresh */}
       <div className="hidden lg:block w-72 shrink-0">
-        <Sidebar key={sidebarKey} levelN={levelN} onLevelSelect={handleLevelChange} />
+        <Sidebar key={sidebarKey} levelN={levelN} onLevelSelect={handleLevelChange} mode={mode} />
       </div>
 
     </div>

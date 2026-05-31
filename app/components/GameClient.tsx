@@ -14,6 +14,7 @@ interface Props {
   levelN: number;
   onLevelChange: (n: number) => void;
   onLevelWin?: () => void;
+  onModeChange?: (mode: Mode) => void;
 }
 
 const LS = {
@@ -24,6 +25,8 @@ const LS = {
   gamesPlayed:"bl-games-played",
   levelsBest: "bl-levels-best",
   levelDone:  (n: number) => `bl-level-done-${n}`,
+  levelMoves: (n: number) => `bl-level-moves-${n}`,
+  levelBest:  (n: number) => `bl-level-best-${n}`,
 };
 
 function calcScore(moves: number, par: number) {
@@ -36,7 +39,7 @@ function getYesterdayKey(): string {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props) {
+export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeChange }: Props) {
   const [mode, setMode] = useState<Mode>("daily");
   const [grid, setGrid] = useState<Color[][]>([]);
   const [territory, setTerritory] = useState<Set<string>>(new Set(["0-0"]));
@@ -85,6 +88,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
 
   useEffect(() => {
     const baseGrid = mode === "daily" ? getDailyGrid() : getLevelGrid(levelN);
+    const computedPar = calculatePar(baseGrid);
 
     if (mode === "daily") {
       const key = getTodayKey();
@@ -97,7 +101,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
           setMoves(s.moves);
           setGameOver(s.gameOver);
           setShowResults(false);
-          setPar(calculatePar(baseGrid));
+          setPar(computedPar);
           setNewCells(new Map());
           setAnimating(false);
           setWinPhase(false);
@@ -106,12 +110,26 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
       }
     }
 
+    if (mode === "levels" && localStorage.getItem(LS.levelDone(levelN)) === "true") {
+      const savedMoves = parseInt(localStorage.getItem(LS.levelMoves(levelN)) || "0");
+      setGrid(baseGrid);
+      setTerritory(new Set<string>(["0-0"]));
+      setMoves(savedMoves);
+      setGameOver(true);
+      setShowResults(true);
+      setPar(computedPar);
+      setNewCells(new Map());
+      setAnimating(false);
+      setWinPhase(false);
+      return;
+    }
+
     setGrid(baseGrid);
     setTerritory(new Set<string>(["0-0"]));
     setMoves(0);
     setGameOver(false);
     setShowResults(false);
-    setPar(calculatePar(baseGrid));
+    setPar(computedPar);
     setNewCells(new Map());
     setAnimating(false);
     setWinPhase(false);
@@ -170,6 +188,8 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
         setBestScore(newBestScore);
       } else {
         localStorage.setItem(LS.levelDone(s.levelN), "true");
+        localStorage.setItem(LS.levelMoves(s.levelN), String(newMoves));
+        localStorage.setItem(LS.levelBest(s.levelN), String(score));
         const newLevelsBest = Math.max(s.levelsBest, score);
         localStorage.setItem(LS.levelsBest, String(newLevelsBest));
         setLevelsBest(newLevelsBest);
@@ -187,6 +207,23 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
       }));
     }
   }, []); // reads via stateRef
+
+  const handlePlayAgain = useCallback(() => {
+    localStorage.removeItem(LS.levelDone(levelN));
+    localStorage.removeItem(LS.levelMoves(levelN));
+    localStorage.removeItem(LS.levelBest(levelN));
+    const baseGrid = getLevelGrid(levelN);
+    setGrid(baseGrid);
+    setTerritory(new Set<string>(["0-0"]));
+    setMoves(0);
+    setGameOver(false);
+    setShowResults(false);
+    setPar(calculatePar(baseGrid));
+    setNewCells(new Map());
+    setAnimating(false);
+    setWinPhase(false);
+    onLevelWin?.();
+  }, [levelN, onLevelWin]);
 
   const currentColor = grid[0]?.[0];
   if (!grid.length) return null;
@@ -211,7 +248,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
         textTransform: "uppercase",
       }}>
         {(["daily", "levels"] as Mode[]).map(m => (
-          <button key={m} onClick={() => setMode(m)} style={{
+          <button key={m} onClick={() => { setMode(m); onModeChange?.(m); }} style={{
             padding: "8px 20px",
             background: mode === m ? "var(--terracotta, #c45a3a)" : "transparent",
             color: mode === m ? "#fff" : "var(--ink-soft, #5a4632)",
@@ -275,6 +312,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin }: Props)
           onNextLevel={mode === "levels"
             ? () => { setShowResults(false); onLevelChange(levelN + 1); }
             : undefined}
+          onPlayAgain={mode === "levels" ? handlePlayAgain : undefined}
         />
       )}
     </div>
