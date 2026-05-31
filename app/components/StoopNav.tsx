@@ -1,12 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const GAMES = [
-  { key: "dailyguessr",    label: "DailyGuessr",    url: "https://dailyguessr.app" },
-  { key: "flagguessr",     label: "FlagGuessr",      url: "https://flagguessr.app" },
-  { key: "cocktailguessr", label: "CocktailGuessr",  url: "https://cocktailguessr.app" },
-  { key: "palette",        label: "Palette",          url: "https://palette.stoop.games" },
-  { key: "bloom",          label: "Bloom",            url: "https://bloom.stoop.games" },
+const DAILY_GAMES = [
+  { key: "dailyguessr",    label: "DailyGuessr",    url: "https://dailyguessr.app",     emoji: "🌍" },
+  { key: "flagguessr",     label: "FlagGuessr",      url: "https://flagguessr.app",      emoji: "🏳️" },
+  { key: "cocktailguessr", label: "CocktailGuessr",  url: "https://cocktailguessr.app",  emoji: "🍹" },
+];
+
+const ARCADE_GAMES = [
+  { key: "palette", label: "Palette", url: "https://palette.stoop.games", emoji: "🎨" },
+  { key: "bloom",   label: "Bloom",   url: "https://bloom.stoop.games",   emoji: "🌊" },
+  { key: "sortl",   label: "Sortl",   url: "https://sortl.stoop.games",   emoji: "🧪" },
 ];
 
 const DAYS = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
@@ -19,6 +23,17 @@ export default function StoopNav({ currentGame }: { currentGame: string }) {
     setDateStr(`${DAYS[d.getDay()]} ${String(d.getDate()).padStart(2,"0")} ${MONTHS[d.getMonth()]}`);
   }, []);
 
+  const linkStyle = (key: string): React.CSSProperties => ({
+    color: key === currentGame ? "#c45a3a" : "var(--ink-soft, #5a4632)",
+    textDecoration: "none",
+    borderBottom: key === currentGame ? "1px solid #c45a3a" : "1px solid transparent",
+    paddingBottom: 2,
+    display: "flex",
+    alignItems: "center",
+    gap: 3,
+    flexShrink: 0,
+  });
+
   return (
     <nav style={{
       background: "var(--paper, #f3e9d6)",
@@ -30,7 +45,7 @@ export default function StoopNav({ currentGame }: { currentGame: string }) {
         maxWidth: 1240, margin: "0 auto",
         padding: "0 24px",
         height: 44,
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
       }}>
         <a href="https://stoop.games" style={{
           display: "flex", alignItems: "center", gap: 8,
@@ -48,16 +63,30 @@ export default function StoopNav({ currentGame }: { currentGame: string }) {
         </a>
 
         <div style={{
-          display: "flex", gap: 20, alignItems: "center",
-          fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em",
+          display: "flex", alignItems: "center", gap: 10,
+          fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em",
+          overflow: "hidden",
         }} className="stoop-gamenav">
-          {GAMES.map(g => (
-            <a key={g.key} href={g.url} style={{
-              color: g.key === currentGame ? "#c45a3a" : "var(--ink-soft, #5a4632)",
-              textDecoration: "none",
-              borderBottom: g.key === currentGame ? "1px solid #c45a3a" : "1px solid transparent",
-              paddingBottom: 2,
-            }}>{g.label}</a>
+          <span style={{ color: "var(--ink-faded, #8a7355)", fontSize: 9, letterSpacing: "0.16em", flexShrink: 0 }}>
+            Daily
+          </span>
+          {DAILY_GAMES.map(g => (
+            <a key={g.key} href={g.url} style={linkStyle(g.key)}>
+              <span style={{ fontSize: 12 }}>{g.emoji}</span>
+              {g.label}
+            </a>
+          ))}
+
+          <span style={{ width: 1, height: 14, background: "rgba(42,31,21,0.2)", flexShrink: 0, display: "block" }} />
+
+          <span style={{ color: "var(--ink-faded, #8a7355)", fontSize: 9, letterSpacing: "0.16em", flexShrink: 0 }}>
+            Arcade
+          </span>
+          {ARCADE_GAMES.map(g => (
+            <a key={g.key} href={g.url} style={linkStyle(g.key)}>
+              <span style={{ fontSize: 12 }}>{g.emoji}</span>
+              {g.label}
+            </a>
           ))}
         </div>
 
@@ -67,7 +96,7 @@ export default function StoopNav({ currentGame }: { currentGame: string }) {
         }}>{dateStr}</span>
       </div>
 
-      <style>{`.stoop-gamenav { display: flex; } @media(max-width:600px){ .stoop-gamenav { display: none; } }`}</style>
+      <style>{`.stoop-gamenav { display: flex; } @media(max-width:720px){ .stoop-gamenav { display: none; } }`}</style>
     </nav>
   );
 }

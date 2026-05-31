@@ -26,15 +26,24 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-44px)]">
-      <main className="flex-1 min-w-0 flex flex-col items-center">
-        <GameClient
-          levelN={levelN}
-          onLevelChange={handleLevelChange}
-          onLevelWin={handleLevelWin}
-        />
-      </main>
-      <Sidebar key={sidebarKey} levelN={levelN} onLevelSelect={handleLevelChange} />
+    <div className="w-full px-4 flex gap-6 py-6 items-start">
+
+      {/* Game area */}
+      <div className="flex-1 flex flex-col items-center">
+        <div className="w-full max-w-2xl">
+          <GameClient
+            levelN={levelN}
+            onLevelChange={handleLevelChange}
+            onLevelWin={handleLevelWin}
+          />
+        </div>
+      </div>
+
+      {/* Sidebar — key forces remount after win so stats refresh */}
+      <div className="hidden lg:block w-72 shrink-0">
+        <Sidebar key={sidebarKey} levelN={levelN} onLevelSelect={handleLevelChange} />
+      </div>
+
     </div>
   );
 }

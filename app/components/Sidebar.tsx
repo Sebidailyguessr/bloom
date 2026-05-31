@@ -13,11 +13,11 @@ const LS = {
 };
 
 const SCORING: [string, string, string][] = [
-  ["10,000", "PERFECT BLOOM",    "par or better"],
-  ["9,500",  "MASTER GARDENER",  "par + 1"],
-  ["8,500",  "KEEN GARDENER",    "par + 2–3"],
-  ["7,000",  "GREEN THUMB",      "par + 4–6"],
-  ["<7,000", "LEARNING TO GROW", "par + 7+"],
+  ["par or better", "10,000", "PERFECT BLOOM"],
+  ["par + 1",       "9,500",  "MASTER GARDENER"],
+  ["par + 2–3",     "8,500",  "KEEN GARDENER"],
+  ["par + 4–6",     "7,000",  "GREEN THUMB"],
+  ["par + 7+",      "<7,000", "LEARNING TO GROW"],
 ];
 
 interface Props {
@@ -46,16 +46,15 @@ export default function Sidebar({ levelN, onLevelSelect }: Props) {
   }, []);
 
   return (
-    <aside className="hidden lg:flex w-72 shrink-0 flex-col bg-[#ebdfc4] border-l border-[rgba(42,31,21,0.18)] overflow-y-auto lg:sticky lg:top-[44px] lg:self-start lg:max-h-[calc(100vh-44px)]">
+    <aside className="flex flex-col w-full bg-[#ebdfc4] border-l border-[rgba(42,31,21,0.18)] overflow-y-auto">
 
       {/* Branding */}
       <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
-        <span className="text-[#2a1f15] font-bold tracking-tight select-none text-lg"
-          style={{ fontFamily: "'Caprasimo', serif" }}>
+        <span style={{ fontFamily: "'Caprasimo', serif", fontSize: 18, color: 'var(--ink, #2a1f15)' }}>
           Bloom
         </span>
         <p className="text-[#8a7355] text-xs mt-0.5 font-mono">
-          Daily flood-fill colour game
+          Fill the grid in as few moves as possible.
         </p>
       </div>
 
@@ -142,10 +141,11 @@ export default function Sidebar({ levelN, onLevelSelect }: Props) {
         <div className="bg-[var(--paper)] rounded-xl p-3 border border-dashed border-[rgba(42,31,21,0.18)]">
           <p className="text-[#5a4632] text-xs font-semibold uppercase tracking-widest mb-2 font-mono">Scoring</p>
           <div className="space-y-1">
-            {SCORING.map(([pts, label]) => (
+            {SCORING.map(([condition, pts, label]) => (
               <div key={pts} className="flex items-center text-xs gap-2">
-                <span className="text-[#c45a3a] font-semibold tabular-nums w-14 shrink-0">{pts}</span>
-                <span className="text-[#8a7355] truncate">{label}</span>
+                <span className="text-[#8a7355] w-20 shrink-0 font-mono">{condition}</span>
+                <span className="text-[#2a1f15] font-semibold tabular-nums w-14 font-mono">{pts}</span>
+                <span className="text-[#8a7355]">{label}</span>
               </div>
             ))}
           </div>
