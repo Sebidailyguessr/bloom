@@ -287,19 +287,41 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         disabled={gameOver || animating}
       />
 
-      {mode === "daily" && dailyDone && !showResults && (
-        <button onClick={() => setShowResults(true)} style={{
-          background: "transparent",
-          border: "1px dashed rgba(42,31,21,0.18)",
-          borderRadius: 8,
-          padding: "10px 24px",
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: 11,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          color: "var(--ink-soft, #5a4632)",
-          cursor: "pointer",
-        }}>Show result</button>
+      {gameOver && !showResults && (
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <button
+            onClick={() => setShowResults(true)}
+            style={{
+              padding: "10px 22px",
+              background: "transparent",
+              color: "var(--ink-soft, #5a4632)",
+              border: "1px dashed rgba(42,31,21,0.3)",
+              borderRadius: 8,
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: 11,
+              textTransform: "uppercase",
+              letterSpacing: "0.18em",
+              cursor: "pointer",
+            }}
+          >📊 Results</button>
+          {mode === "levels" && (
+            <button
+              onClick={() => { setShowResults(false); onLevelChange(levelN + 1); }}
+              style={{
+                padding: "10px 22px",
+                background: "var(--terracotta, #c45a3a)",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.18em",
+                cursor: "pointer",
+              }}
+            >Next Level →</button>
+          )}
+        </div>
       )}
 
       {showResults && (

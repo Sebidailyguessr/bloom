@@ -14,6 +14,7 @@ export default function StoopFooter() {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 16, flexWrap: "wrap",
       }}>
+        {/* Part of Stoop */}
         <a href="https://stoop.games" style={{
           display: "flex", alignItems: "center", gap: 6,
           fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em",
@@ -26,13 +27,13 @@ export default function StoopFooter() {
           </span>
         </a>
 
+        {/* Page links */}
         <div style={{ display: "flex", gap: 16, fontSize: 10,
           textTransform: "uppercase", letterSpacing: "0.12em" }}>
           {[
-            { label: "DailyGuessr",    href: "https://dailyguessr.app" },
-            { label: "FlagGuessr",     href: "https://flagguessr.app" },
-            { label: "CocktailGuessr", href: "https://cocktailguessr.app" },
-            { label: "Palette",        href: "https://palette.stoop.games" },
+            { label: "About",   href: "/about" },
+            { label: "Contact", href: "/contact" },
+            { label: "Privacy", href: "/privacy" },
           ].map(link => (
             <a key={link.href} href={link.href} style={{
               color: "var(--ink-faded, #8a7355)", textDecoration: "none",
@@ -43,6 +44,7 @@ export default function StoopFooter() {
           ))}
         </div>
 
+        {/* Copyright */}
         <span style={{ fontSize: 10, letterSpacing: "0.08em",
           color: "var(--ink-faded, #8a7355)" }}>© 2026 · Stoop</span>
       </div>

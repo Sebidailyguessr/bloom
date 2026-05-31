@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { getPuzzleNumber } from "@/lib/daily";
 import RotatingAlsoPlay from "./RotatingAlsoPlay";
 
 const TOTAL_LEVELS = 300;
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
+  const puzzleNumber = getPuzzleNumber()
   const [streak, setStreak]           = useState(0);
   const [bestStreak, setBestStreak]   = useState(0);
   const [bestScore, setBestScore]     = useState(0);
@@ -56,7 +58,7 @@ export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
         </span>
         <p className="text-[#8a7355] text-xs mt-0.5 font-mono">
           {mode === 'daily'
-            ? 'Fill the grid in as few moves as possible.'
+            ? `#${String(puzzleNumber).padStart(3, '0')} · Daily flood-fill. One shot.`
             : `Level ${levelN} · 300 levels. No limits.`}
         </p>
       </div>
