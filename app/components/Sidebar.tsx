@@ -49,7 +49,7 @@ export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
   }, []);
 
   return (
-    <aside className="flex flex-col w-full bg-[#ebdfc4] border-l border-[rgba(42,31,21,0.18)] overflow-y-auto">
+    <aside className="w-full min-h-full bg-[#ebdfc4] border-l border-dashed border-[rgba(42,31,21,0.18)]">
 
       {/* Branding */}
       <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">

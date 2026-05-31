@@ -234,7 +234,6 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
       flexDirection: "column",
       alignItems: "center",
       gap: 20,
-      padding: "24px 16px",
     }}>
       {/* Mode tabs */}
       <div style={{
