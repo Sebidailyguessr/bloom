@@ -198,6 +198,8 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
               transition: 'background 0.2s ease',
             }}
           >{copied ? '✓ Copied!' : 'Share'}</button>
+
+          <a href='https://ko-fi.com/stoopgames' target='_blank' rel='noopener noreferrer' style={{display:'block',textAlign:'center',fontFamily:'monospace',fontSize:'11px',color:'#8a7355',letterSpacing:'0.05em',textDecoration:'none',marginTop:'12px'}}>☕ enjoyed it? buy me a coffee</a>
         </div>
 
         {/* Also Play */}
