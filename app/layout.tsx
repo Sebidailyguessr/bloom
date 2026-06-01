@@ -10,10 +10,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://bloom.stoop.games'),
   openGraph: {
     title: 'Bloom — Daily flood-fill puzzle',
-    description: 'Fill the grid in as few moves as possible. New puzzle every day.',
+    description: 'Fill the 14×14 grid in as few moves as possible. One daily puzzle for everyone. Free, no account needed.',
     url: 'https://bloom.stoop.games',
     siteName: 'Bloom',
-    description: 'Fill the 14×14 grid in as few moves as possible. One daily puzzle for everyone. Free, no account needed.',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
     locale: 'en_US',
     type: 'website',
