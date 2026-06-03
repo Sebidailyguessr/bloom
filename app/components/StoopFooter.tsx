@@ -9,12 +9,12 @@ export default function StoopFooter({ currentGame: _ }: { currentGame: string })
     <footer style={{
       background: "#e5d5b3",
       borderTop: "1px dashed rgba(42,31,21,0.18)",
-      padding: "20px 18px 18px",
+      padding: "16px 24px",
       marginTop: "auto",
     }}>
 
       {/* Row 1 — brand */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <a href="https://stoop.games" style={{
           display: "flex", alignItems: "center", gap: 7,
           textDecoration: "none",
@@ -42,23 +42,25 @@ export default function StoopFooter({ currentGame: _ }: { currentGame: string })
       {/* Row 2 — links */}
       <div style={{
         display: "flex",
+        justifyContent: "center",
+        gap: 40,
         borderTop: "1px dashed rgba(42,31,21,0.18)",
-        paddingTop: 12, marginTop: 2,
+        borderBottom: "1px dashed rgba(42,31,21,0.18)",
+        padding: "10px 0",
+        margin: "0 0 10px",
       }}>
         {[
-          { label: "About",   href: "/about",   border: true },
-          { label: "Contact", href: "/contact", border: true },
-          { label: "Privacy", href: "/privacy", border: false },
+          { label: "About",   href: "/about" },
+          { label: "Contact", href: "/contact" },
+          { label: "Privacy", href: "/privacy" },
         ].map(link => (
           <a
             key={link.href}
             href={link.href}
             style={{
               ...mono,
-              flex: 1, textAlign: "center",
               fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em",
               color: "#5a4632", textDecoration: "none",
-              borderRight: link.border ? "1px dashed rgba(42,31,21,0.18)" : "none",
               padding: "4px 0",
             }}
             onMouseEnter={e => (e.currentTarget.style.color = "#c45a3a")}
@@ -70,7 +72,7 @@ export default function StoopFooter({ currentGame: _ }: { currentGame: string })
       </div>
 
       {/* Row 3 — copyright + ko-fi */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{
           ...mono,
           fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", color: "#8a7355",
