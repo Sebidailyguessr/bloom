@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <StoopNav currentGame="bloom" />
         <main className="flex-1 flex flex-col">{children}</main>
-        <StoopFooter />
+        <StoopFooter currentGame="bloom" />
         <nav aria-label="More Stoop games" style={{ borderTop: '1px dashed rgba(42,31,21,0.18)', background: '#f3e9d6', padding: '24px 16px', textAlign: 'center' }}>
           <p style={{ fontFamily: 'var(--mono, "JetBrains Mono", monospace)', fontSize: 11, color: '#8a7355', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>More Stoop games</p>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px 24px' }}>
