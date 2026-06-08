@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import GameClient from "./components/GameClient";
 import Sidebar from "./components/Sidebar";
+import { trackEvent } from "@/utils/trackEvent";
 
 const TOTAL_LEVELS = 300;
 
@@ -13,6 +14,17 @@ export default function HomePage() {
   useEffect(() => {
     const saved = parseInt(localStorage.getItem("bl-current-level") || "1");
     setLevelN(Math.min(Math.max(1, saved), TOTAL_LEVELS));
+  }, []);
+
+  useEffect(() => {
+    try {
+      const streak = parseInt(localStorage.getItem("bl-streak") || "0");
+      if (streak > 0) {
+        trackEvent('returning_player', { game: 'bl', daysSince: 0 });
+      } else {
+        trackEvent('first_visit', { game: 'bl' });
+      }
+    } catch { /* ignore */ }
   }, []);
 
   const handleLevelChange = (n: number) => {

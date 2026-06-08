@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import RotatingAlsoPlay from './RotatingAlsoPlay'
+import { trackEvent } from '@/utils/trackEvent'
 
 function getCountdown(): string {
   const now = new Date()
@@ -55,6 +56,7 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
   }, [mode])
 
   const handleShare = async () => {
+    if (mode === 'daily') trackEvent('share_clicked', { game: 'bl', puzzleNo: puzzleNumber })
     const text = mode === 'daily'
       ? `🌊 Bloom #${numStr}\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`
       : `🌊 Bloom — Level ${puzzleNumber}\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`
@@ -199,7 +201,7 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
             }}
           >{copied ? '✓ Copied!' : 'Share'}</button>
 
-          <a href='https://ko-fi.com/stoopgames' target='_blank' rel='noopener noreferrer' style={{display:'block',textAlign:'center',fontFamily:'monospace',fontSize:'11px',color:'#8a7355',letterSpacing:'0.05em',textDecoration:'none',marginTop:'12px'}}>☕ enjoyed it? buy me a coffee</a>
+          <a href='https://ko-fi.com/stoopgames' target='_blank' rel='noopener noreferrer' onClick={() => trackEvent('kofi_clicked', { game: 'bl' })} style={{display:'block',textAlign:'center',fontFamily:'monospace',fontSize:'11px',color:'#8a7355',letterSpacing:'0.05em',textDecoration:'none',marginTop:'12px'}}>☕ enjoyed it? buy me a coffee</a>
         </div>
 
         {/* Also Play */}

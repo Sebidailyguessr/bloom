@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Color, floodFill, isSolved } from "@/lib/grid";
 import { calculatePar } from "@/lib/par";
 import { getDailyGrid, getLevelGrid, getTodayKey, getPuzzleNumber } from "@/lib/daily";
+import { trackEvent } from "@/utils/trackEvent";
 import GameGrid from "./GameGrid";
 import ColorPicker from "./ColorPicker";
 import MoveCounter from "./MoveCounter";
@@ -55,6 +56,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
 
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const [bestScore, setBestScore] = useState(0);
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [levelsBest, setLevelsBest] = useState(0);
@@ -84,7 +86,16 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
     if (saved) {
       try { if (JSON.parse(saved).gameOver) setDailyDone(true); } catch { /* ignore */ }
     }
+    setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (mode === "daily" && !dailyDone) {
+      trackEvent('puzzle_started', { game: 'bl', puzzleNo: getPuzzleNumber() });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
 
   useEffect(() => {
     const baseGrid = mode === "daily" ? getDailyGrid() : getLevelGrid(levelN);
@@ -175,6 +186,8 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         const yState = localStorage.getItem(LS.state(getYesterdayKey()));
         let hadYesterday = false;
         try { hadYesterday = yState ? JSON.parse(yState).gameOver : false; } catch { /* ignore */ }
+        const scoreBand = score === 10000 ? 'perfect' : score >= 9500 ? 'great' : score >= 8500 ? 'good' : score >= 7000 ? 'ok' : 'low';
+        trackEvent('puzzle_completed', { game: 'bl', puzzleNo: getPuzzleNumber(), scoreBand });
         const newStreak = hadYesterday ? s.streak + 1 : 1;
         const newBestStreak = Math.max(s.bestStreak, newStreak);
         localStorage.setItem(LS.streak, String(newStreak));

@@ -1,38 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { trackEvent, type GameId } from '@/utils/trackEvent'
 
 const GAMES = [
-  {
-    name: 'FlagGuessr',
-    description: 'Guess the country from its flag',
-    url: 'https://flagguessr.app',
-    emoji: '🏳️',
-  },
-  {
-    name: 'CocktailGuessr',
-    description: "Guess today's cocktail",
-    url: 'https://cocktailguessr.app',
-    emoji: '🍹',
-  },
-  {
-    name: 'Palette',
-    description: "Match today's colour with sliders",
-    url: 'https://palette.stoop.games',
-    emoji: '🎨',
-  },
-  {
-    name: 'Bloom',
-    description: 'Fill the grid in as few moves as possible',
-    url: 'https://bloom.stoop.games',
-    emoji: '🌸',
-  },
-  {
-    name: 'Sortl',
-    description: 'Sort the tubes by colour',
-    url: 'https://sortl.stoop.games',
-    emoji: '🧪',
-  },
+  { id: 'dg' as GameId, name: 'DailyGuessr',    description: 'Guess the location from a panorama',   url: 'https://dailyguessr.app',         emoji: '🌍' },
+  { id: 'fg' as GameId, name: 'FlagGuessr',      description: 'Guess the country from its flag',      url: 'https://flagguessr.app',           emoji: '🏳️' },
+  { id: 'cg' as GameId, name: 'CocktailGuessr',  description: "Guess today's cocktail",               url: 'https://cocktailguessr.app',       emoji: '🍹' },
+  { id: 'pl' as GameId, name: 'Palette',          description: "Match today's colour with sliders",   url: 'https://palette.stoop.games',      emoji: '🎨' },
+  { id: 'sl' as GameId, name: 'Sortl',            description: 'Sort the tubes by colour',             url: 'https://sortl.stoop.games',        emoji: '🧪' },
 ]
 
 const ARROW_CSS = `
@@ -57,7 +33,7 @@ const ARROW_CSS = `
   .rp-arrow-right { right: 8px; }
 `
 
-export default function RotatingAlsoPlay() {
+export default function RotatingAlsoPlay({ from = 'bl' as GameId }: { from?: GameId }) {
   const [current, setCurrent] = useState(0)
   const [opacity, setOpacity] = useState(1)
   const [paused, setPaused]   = useState(false)
@@ -138,6 +114,7 @@ export default function RotatingAlsoPlay() {
           href={game.url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackEvent('also_play_clicked', { from, to: game.id })}
           className="flex items-center gap-3 p-3 rounded-lg bg-[#e5d5b3] border border-dashed border-[rgba(42,31,21,0.18)] hover:border-[#c45a3a] transition-colors"
           style={{ opacity, transition: 'opacity 300ms ease', paddingLeft: 28, paddingRight: 28 }}
         >
