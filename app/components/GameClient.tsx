@@ -112,7 +112,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
           setTerritory(new Set<string>(s.territory));
           setMoves(s.moves);
           setGameOver(s.gameOver);
-          setShowResults(false);
+          setShowResults(s.gameOver === true);
           setPar(computedPar);
           setNewCells(new Map());
           setAnimating(false);

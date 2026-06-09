@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import RotatingAlsoPlay from './RotatingAlsoPlay'
 import { trackEvent } from '@/utils/trackEvent'
+import { useNextPuzzleCountdown } from '@/hooks/useNextPuzzleCountdown'
 
 function getCountdown(): string {
   const now = new Date()
@@ -41,13 +42,37 @@ interface Props {
 
 const mono = "'JetBrains Mono', ui-monospace, monospace"
 
+const STREAK_MILESTONES = [3, 7, 14, 30]
+
 export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose, onNextLevel, onPlayAgain }: Props) {
   const [countdown, setCountdown] = useState(getCountdown)
   const [copied, setCopied] = useState(false)
+  const milestoneFired = useRef(false)
 
   const score = getScore(moves, par)
   const label = getLabel(score)
   const numStr = String(puzzleNumber).padStart(3, '0')
+
+  const streakNextCountdown = useNextPuzzleCountdown()
+
+  const streakCount = (() => {
+    if (typeof window === 'undefined') return 0
+    try {
+      return parseInt(localStorage.getItem('bl-streak') ?? '0', 10)
+    } catch {
+      return 0
+    }
+  })()
+
+  const streakState: 'active' | 'none' = streakCount > 0 ? 'active' : 'none'
+
+  useEffect(() => {
+    if (mode !== 'daily') return
+    if (streakState === 'active' && STREAK_MILESTONES.includes(streakCount) && !milestoneFired.current) {
+      milestoneFired.current = true
+      trackEvent('streak_milestone', { game: 'bloom', milestone: streakCount })
+    }
+  }, [mode, streakState, streakCount])
 
   useEffect(() => {
     if (mode !== 'daily') return
@@ -144,10 +169,6 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
           {mode === 'daily' ? (
             <div style={{ marginBottom: 16 }}>
               <p style={{
-                fontFamily: mono, fontSize: 11, color: 'var(--ink-soft, #5a4632)',
-                margin: '0 0 8px',
-              }}>🔥 Come back tomorrow to keep your streak!</p>
-              <p style={{
                 fontFamily: mono, fontSize: 20, fontWeight: 600,
                 color: 'var(--ink, #2a1f15)', letterSpacing: '0.06em',
                 margin: 0,
@@ -202,6 +223,43 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
           >{copied ? '✓ Copied!' : 'Share'}</button>
 
           <a href='https://ko-fi.com/stoopgames' target='_blank' rel='noopener noreferrer' onClick={() => trackEvent('kofi_clicked', { game: 'bl' })} style={{display:'block',textAlign:'center',fontFamily:'monospace',fontSize:'11px',color:'#8a7355',letterSpacing:'0.05em',textDecoration:'none',marginTop:'12px'}}>☕ enjoyed it? buy me a coffee</a>
+
+          {/* Streak milestone badge */}
+          {mode === 'daily' && streakState === 'active' && STREAK_MILESTONES.includes(streakCount) && (
+            <div style={{ textAlign: 'center', marginTop: '12px' }}>
+              <span style={{
+                display: 'inline-block',
+                background: 'rgba(196, 90, 58, 0.08)',
+                border: '1px solid rgba(196, 90, 58, 0.25)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontFamily: mono,
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                color: '#c45a3a',
+              }}>
+                🔥 {streakCount}-day streak! You&apos;re a regular.
+              </span>
+            </div>
+          )}
+
+          {/* Streak reminder */}
+          {mode === 'daily' && (
+            <div style={{ fontFamily: mono, fontSize: '11px', color: '#8a7355', textAlign: 'center', padding: '12px 0' }}>
+              {streakState === 'active' ? (
+                <>
+                  <div>🔥 {streakCount}-day streak — next puzzle in {streakNextCountdown}</div>
+                  <div>Come back tomorrow to keep it.</div>
+                </>
+              ) : (
+                <>
+                  <div>🧩 New puzzle every day at midnight.</div>
+                  <div>See you tomorrow 👋</div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Also Play */}

@@ -10,6 +10,7 @@ export type TrackEventName =
   | 'returning_player'
   | 'first_visit'
   | 'onboarding_dismissed'
+  | 'streak_milestone'
 
 export function trackEvent(name: TrackEventName, data?: Record<string, unknown>) {
   if (typeof window !== 'undefined' && (window as any).umami) {
