@@ -16,6 +16,7 @@ interface Props {
   onLevelChange: (n: number) => void;
   onLevelWin?: () => void;
   onModeChange?: (mode: Mode) => void;
+  onDailyComplete?: () => void;
 }
 
 const LS = {
@@ -40,7 +41,7 @@ function getYesterdayKey(): string {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeChange }: Props) {
+export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeChange, onDailyComplete }: Props) {
   const [mode, setMode] = useState<Mode>("daily");
   const [grid, setGrid] = useState<Color[][]>([]);
   const [territory, setTerritory] = useState<Set<string>>(new Set(["0-0"]));
@@ -64,13 +65,13 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
   const stateRef = useRef({
     grid, territory, moves, par, mode, gameOver, animating,
     streak, bestStreak, bestScore, gamesPlayed, levelsBest, levelN,
-    onLevelWin,
+    onLevelWin, onDailyComplete,
   });
   useEffect(() => {
     stateRef.current = {
       grid, territory, moves, par, mode, gameOver, animating,
       streak, bestStreak, bestScore, gamesPlayed, levelsBest, levelN,
-      onLevelWin,
+      onLevelWin, onDailyComplete,
     };
   });
 
@@ -195,6 +196,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         setStreak(newStreak);
         setBestStreak(newBestStreak);
         setDailyDone(true);
+        s.onDailyComplete?.();
 
         const newBestScore = Math.max(s.bestScore, score);
         localStorage.setItem(LS.bestScore, String(newBestScore));

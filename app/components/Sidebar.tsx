@@ -25,9 +25,11 @@ interface Props {
   levelN: number;
   onLevelSelect: (n: number) => void;
   mode: 'daily' | 'levels';
+  isNewUser?: boolean;
+  dailyDone?: boolean;
 }
 
-export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
+export default function Sidebar({ levelN, onLevelSelect, mode, isNewUser = false, dailyDone = false }: Props) {
   const puzzleNumber = getPuzzleNumber()
   const [streak, setStreak]           = useState(0);
   const [bestStreak, setBestStreak]   = useState(0);
@@ -62,6 +64,14 @@ export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
             : `Level ${levelN} · 300 levels. No limits.`}
         </p>
       </div>
+
+      {/* Daily hint badge — new users only, daily mode, not done */}
+      {isNewUser && !dailyDone && mode === 'daily' && (
+        <p className="px-5 py-1.5 text-[#8a7355] border-b border-[rgba(42,31,21,0.08)]"
+           style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11 }}>
+          🗓 New puzzle every day at midnight UTC
+        </p>
+      )}
 
       {/* Your Stats — daily only */}
       {mode === 'daily' && (
@@ -163,6 +173,36 @@ export default function Sidebar({ levelN, onLevelSelect, mode }: Props) {
           </div>
         )}
       </div>
+
+      {/* Also on Stoop (new users only) */}
+      {isNewUser && (
+        <div className="px-5 py-3 border-b border-[rgba(42,31,21,0.18)] shrink-0">
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11, color: "#8a7355", lineHeight: 1.7 }}>
+            🧩 Also on Stoop:{" "}
+            {[
+              { label: "dailyguessr.app",   url: "https://dailyguessr.app" },
+              { label: "flagguessr.app",    url: "https://flagguessr.app" },
+              { label: "cocktailguessr.app",url: "https://cocktailguessr.app" },
+              { label: "palette.stoop.games",url: "https://palette.stoop.games" },
+              { label: "sortl.stoop.games", url: "https://sortl.stoop.games" },
+            ].map((g, i, arr) => (
+              <span key={g.url}>
+                <a
+                  href={g.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#c45a3a", textDecoration: "none" }}
+                  onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
+                  onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
+                >
+                  {g.label}
+                </a>
+                {i < arr.length - 1 && <span style={{ color: "#8a7355" }}> · </span>}
+              </span>
+            ))}
+          </p>
+        </div>
+      )}
 
       {/* Also Play */}
       <div className="px-5 py-4 shrink-0">
