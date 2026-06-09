@@ -1,5 +1,7 @@
 "use client";
 
+import NewsletterSignup from "./NewsletterSignup";
+
 export default function StoopFooter({ currentGame: _ }: { currentGame: string }) {
   const mono: React.CSSProperties = {
     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -71,7 +73,10 @@ export default function StoopFooter({ currentGame: _ }: { currentGame: string })
         ))}
       </div>
 
-      {/* Row 3 — copyright + ko-fi */}
+      {/* Row 3 — newsletter */}
+      <NewsletterSignup />
+
+      {/* Row 4 — copyright + ko-fi */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{
           ...mono,
