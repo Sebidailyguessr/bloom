@@ -44,6 +44,14 @@ const mono = "'JetBrains Mono', ui-monospace, monospace"
 
 const STREAK_MILESTONES = [3, 7, 14, 30]
 
+function getEmojiRow(score: number): string {
+  if (score === 10000) return '🟩🟩🟩🟩🟩'
+  if (score >= 9500)   return '🟩🟩🟩🟩⬛'
+  if (score >= 8500)   return '🟩🟩🟩⬛⬛'
+  if (score >= 7000)   return '🟩🟩⬛⬛⬛'
+  return '🟩⬛⬛⬛⬛'
+}
+
 export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose, onNextLevel, onPlayAgain }: Props) {
   const [countdown, setCountdown] = useState(getCountdown)
   const [copied, setCopied] = useState(false)
@@ -80,13 +88,59 @@ export default function ResultsOverlay({ moves, par, puzzleNumber, mode, onClose
     return () => clearInterval(id)
   }, [mode])
 
+  const buildResultsCanvas = (): Promise<Blob | null> =>
+    new Promise((resolve) => {
+      try {
+        const W = 1200, H = 630
+        const canvas = document.createElement('canvas')
+        canvas.width = W; canvas.height = H
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { resolve(null); return }
+
+        const num = numStr
+        const labelColor = score >= 9000 ? '#c45a3a' : score >= 7000 ? '#8a7355' : '#6b5c4a'
+
+        ctx.fillStyle = '#f3e9d6'; ctx.fillRect(0, 0, W, H)
+        ctx.fillStyle = '#2a1f15'; ctx.fillRect(0, 0, W, 160)
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 26px monospace'
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+        ctx.fillText(`BLOOM #${num}`, W / 2, 80)
+        ctx.fillStyle = labelColor; ctx.font = 'bold 44px monospace'
+        ctx.fillText(label, W / 2, 295)
+        ctx.fillStyle = '#2a1f15'; ctx.font = 'bold 30px monospace'
+        ctx.fillText(`${score.toLocaleString()} pts`, W / 2, 375)
+        ctx.font = '48px sans-serif'
+        ctx.fillText(getEmojiRow(score), W / 2, 455)
+        ctx.fillStyle = '#8a7355'; ctx.font = '16px monospace'
+        ctx.fillText('bloom.stoop.games', W / 2, 596)
+
+        canvas.toBlob((blob) => resolve(blob), 'image/png')
+      } catch { resolve(null) }
+    })
+
   const handleShare = async () => {
     if (mode === 'daily') trackEvent('share_clicked', { game: 'bl', puzzleNo: puzzleNumber })
-    const text = mode === 'daily'
-      ? `🌊 Bloom #${numStr}\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`
-      : `🌊 Bloom — Level ${puzzleNumber}\n${label}\n${moves} moves · par ${par}\nbloom.stoop.games`
 
-    try { await navigator.clipboard.writeText(text) } catch { /* ignore */ }
+    const num = numStr
+    const detail = `${score.toLocaleString()} pts`
+    const shareUrl = `${window.location.origin}/share?n=${puzzleNumber}&label=${encodeURIComponent(label.replace(/_/g, ' '))}&detail=${encodeURIComponent(detail)}`
+    const emojiRow = getEmojiRow(score)
+    const text = `🌸 Bloom #${num}\n${label}\n${emojiRow}\n${shareUrl}`
+
+    if (typeof navigator.canShare === 'function') {
+      const blob = await buildResultsCanvas()
+      if (blob) {
+        const file = new File([blob], 'bloom.png', { type: 'image/png' })
+        if (navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], text, url: shareUrl }); return } catch { /* cancelled */ }
+        }
+      }
+      if (navigator.canShare({ url: shareUrl })) {
+        try { await navigator.share({ title: `Bloom #${num}`, text, url: shareUrl }); return } catch { /* cancelled */ }
+      }
+    }
+
+    try { await navigator.clipboard.writeText(text) } catch { /* clipboard unavailable */ }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
