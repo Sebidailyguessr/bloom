@@ -189,6 +189,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         try { hadYesterday = yState ? JSON.parse(yState).gameOver : false; } catch { /* ignore */ }
         const scoreBand = score === 10000 ? 'perfect' : score >= 9500 ? 'great' : score >= 8500 ? 'good' : score >= 7000 ? 'ok' : 'low';
         trackEvent('puzzle_completed', { game: 'bl', puzzleNo: getPuzzleNumber(), scoreBand });
+        localStorage.setItem('bl-last-played', new Date().toISOString().split('T')[0]);
         const newStreak = hadYesterday ? s.streak + 1 : 1;
         const newBestStreak = Math.max(s.bestStreak, newStreak);
         localStorage.setItem(LS.streak, String(newStreak));

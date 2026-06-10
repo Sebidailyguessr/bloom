@@ -36,11 +36,16 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      const streak = parseInt(localStorage.getItem("bl-streak") || "0");
-      if (streak > 0) {
-        trackEvent('returning_player', { game: 'bl', daysSince: 0 });
+      const lastPlayed = localStorage.getItem('bl-last-played')
+      if (lastPlayed) {
+        const daysSince = Math.floor(
+          (Date.now() - new Date(lastPlayed).getTime()) / 86_400_000
+        )
+        if (daysSince < 8) {
+          trackEvent('returning_player', { game: 'bloom', daysSince })
+        }
       } else {
-        trackEvent('first_visit', { game: 'bl' });
+        trackEvent('first_visit', { game: 'bloom' })
       }
     } catch { /* ignore */ }
   }, []);
