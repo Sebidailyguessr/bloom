@@ -66,6 +66,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [levelsBest, setLevelsBest] = useState(0);
   const [levelSubState, setLevelSubState] = useState<LevelSubState>("playing");
+  const [levelGroup, setLevelGroup] = useState<0 | 1 | 2>(0);
   const [doneLevels, setDoneLevels] = useState<Set<number>>(new Set());
 
   const stateRef = useRef({
@@ -280,7 +281,10 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
           <button key={m} onClick={() => {
             setMode(m);
             onModeChange?.(m);
-            if (m === "levels") setLevelSubState("select");
+            if (m === "levels") {
+              setLevelSubState("select");
+              setLevelGroup(Math.min(2, Math.floor((levelN - 1) / 100)) as 0 | 1 | 2);
+            }
           }} style={{
             padding: "8px 20px",
             background: mode === m ? "var(--terracotta, #c45a3a)" : "transparent",
@@ -295,8 +299,36 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
       {/* Level select grid — levels + select */}
       {mode === "levels" && levelSubState === "select" && (
         <div style={{ width: "100%", maxWidth: 480 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
-            {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
+          {/* Group tabs */}
+          <div style={{
+            display: "flex",
+            borderRadius: 8,
+            overflow: "hidden",
+            border: "1px dashed rgba(42,31,21,0.18)",
+            fontFamily: mono,
+            fontSize: 11,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            marginBottom: 16,
+          }}>
+            {([0, 1, 2] as const).map(g => (
+              <button key={g} onClick={() => setLevelGroup(g)} style={{
+                flex: 1,
+                padding: "8px 0",
+                background: levelGroup === g ? "var(--terracotta, #c45a3a)" : "transparent",
+                color: levelGroup === g ? "#fff" : "var(--ink-soft, #5a4632)",
+                border: "none",
+                cursor: "pointer",
+                transition: "background 0.15s ease",
+              }}>
+                {g === 0 ? "1–100" : g === 1 ? "101–200" : "201–300"}
+              </button>
+            ))}
+          </div>
+
+          {/* 100-level grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(10, 1fr)", gap: 6 }}>
+            {Array.from({ length: 100 }, (_, i) => levelGroup * 100 + i + 1).map(n => {
               const completed = doneLevels.has(n);
               const isCurrent = n === levelN;
               return (
@@ -305,10 +337,10 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
                   onClick={() => { onLevelChange(n); setLevelSubState("playing"); }}
                   title={`Level ${n}${completed ? " ✓" : isCurrent ? " (current)" : ""}`}
                   style={{
-                    borderRadius: 8,
-                    padding: "10px 0 8px",
-                    fontFamily: mono, fontSize: 12,
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                    borderRadius: 6,
+                    padding: "8px 0 6px",
+                    fontFamily: mono, fontSize: 11,
+                    display: "flex", flexDirection: "column", alignItems: "center",
                     background: completed ? "#c45a3a" : "transparent",
                     color: completed ? "#f3e9d6" : isCurrent ? "#c45a3a" : "#2a1f15",
                     border: completed ? "none"
@@ -323,6 +355,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
               );
             })}
           </div>
+
           <p style={{ fontFamily: mono, fontSize: 11, color: "#8a7355", marginTop: 16, textAlign: "center" }}>
             <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
             {" / "}{TOTAL_LEVELS} completed

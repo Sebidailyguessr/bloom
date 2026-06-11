@@ -97,49 +97,6 @@ export default function Sidebar({ levelN, onLevelSelect, mode, isNewUser = false
         </div>
       )}
 
-      {/* Levels grid — levels only */}
-      {mode === 'levels' && (
-        <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
-          <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Levels</h2>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(10, 14px)",
-            gap: 3,
-            maxHeight: 200,
-            overflowY: "auto",
-          }}>
-            {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
-              const isDone = doneLevels.has(n);
-              const isCurrent = n === levelN;
-              return (
-                <button
-                  key={n}
-                  onClick={() => onLevelSelect(n)}
-                  title={`Level ${n}${isDone ? " ✓" : isCurrent ? " (current)" : ""}`}
-                  style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: 3,
-                    background: (isDone || isCurrent) ? "#c45a3a" : "rgba(42,31,21,0.1)",
-                    opacity: (isCurrent && !isDone) ? 0.5 : 1,
-                    outline: isCurrent ? "2px solid #c45a3a" : "none",
-                    outlineOffset: 1,
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    flexShrink: 0,
-                  }}
-                />
-              );
-            })}
-          </div>
-          <p className="text-xs mt-2 font-mono">
-            <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
-            <span style={{ color: "#8a7355" }}> / {TOTAL_LEVELS} completed</span>
-          </p>
-        </div>
-      )}
-
       {/* How to Play */}
       <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
         <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">How to Play</h2>
