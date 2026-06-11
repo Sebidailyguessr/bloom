@@ -126,21 +126,19 @@ export default function Sidebar({ levelN, onLevelSelect, mode, isNewUser = false
           ))}
         </ol>
 
-        {/* Scoring table — daily only */}
-        {mode === 'daily' && (
-          <div className="bg-[var(--paper)] rounded-xl p-3 border border-dashed border-[rgba(42,31,21,0.18)]">
-            <p className="text-[#5a4632] text-xs font-semibold uppercase tracking-widest mb-2 font-mono">Scoring</p>
-            <div className="space-y-1">
-              {SCORING.map(([condition, pts, label]) => (
-                <div key={pts} className="flex items-center text-xs gap-2">
-                  <span className="text-[#8a7355] w-20 shrink-0 font-mono">{condition}</span>
-                  <span className="text-[#2a1f15] font-semibold tabular-nums w-14 font-mono">{pts}</span>
-                  <span className="text-[#8a7355]">{label}</span>
-                </div>
-              ))}
-            </div>
+        {/* Scoring table */}
+        <div className="bg-[var(--paper)] rounded-xl p-3 border border-dashed border-[rgba(42,31,21,0.18)]">
+          <p className="text-[#5a4632] text-xs font-semibold uppercase tracking-widest mb-2 font-mono">Scoring</p>
+          <div className="space-y-1">
+            {SCORING.map(([condition, pts, label]) => (
+              <div key={pts} className="flex items-center text-xs gap-2">
+                <span className="text-[#8a7355] w-20 shrink-0 font-mono">{condition}</span>
+                <span className="text-[#2a1f15] font-semibold tabular-nums w-14 font-mono">{pts}</span>
+                <span className="text-[#8a7355]">{label}</span>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Also on Stoop (new users only) */}
