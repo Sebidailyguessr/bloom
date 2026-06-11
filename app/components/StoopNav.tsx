@@ -8,6 +8,7 @@ const GAMES = [
   { key: "palette",        label: "Palette",        domain: "palette.stoop.games",    url: "https://palette.stoop.games",   emoji: "🎨" },
   { key: "bloom",          label: "Bloom",          domain: "bloom.stoop.games",      url: "https://bloom.stoop.games",     emoji: "🌸" },
   { key: "sortl",          label: "Sortl",          domain: "sortl.stoop.games",      url: "https://sortl.stoop.games",     emoji: "🧪" },
+  { key: "higher",         label: "Higher/Lower",   domain: "higher.stoop.games",     url: "https://higher.stoop.games",    emoji: "↕️" },
 ];
 
 const DAILY_GAMES = [
@@ -20,6 +21,7 @@ const ARCADE_GAMES = [
   { key: "palette", label: "Palette", url: "https://palette.stoop.games", emoji: "🎨" },
   { key: "bloom",   label: "Bloom",   url: "https://bloom.stoop.games",   emoji: "🌸" },
   { key: "sortl",   label: "Sortl",   url: "https://sortl.stoop.games",   emoji: "🧪" },
+  { key: "higher",  label: "Higher/Lower", url: "https://higher.stoop.games", emoji: "↕️" },
 ];
 
 const DAYS   = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
