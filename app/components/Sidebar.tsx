@@ -73,11 +73,11 @@ export default function Sidebar({ levelN, onLevelSelect, mode, isNewUser = false
         </p>
       )}
 
-      {/* Your Stats — daily only */}
-      {mode === 'daily' && (
-        <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
-          <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Your Stats</h2>
-          {gamesPlayed === 0 ? (
+      {/* Your Stats */}
+      <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
+        <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Your Stats</h2>
+        {mode === 'daily' ? (
+          gamesPlayed === 0 ? (
             <p className="text-[#8a7355] text-xs">Play your first game to see stats</p>
           ) : (
             <div className="space-y-2.5">
@@ -93,9 +93,21 @@ export default function Sidebar({ levelN, onLevelSelect, mode, isNewUser = false
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      )}
+          )
+        ) : (
+          <div className="space-y-2.5">
+            {([
+              ["📍", "Current level",    String(levelN)],
+              ["✅", "Levels completed", `${doneLevels.size} / 300`],
+            ] as [string, string, string][]).map(([icon, label, value]) => (
+              <div key={label} className="flex items-center justify-between text-sm">
+                <span className="text-[#5a4632]">{icon} {label}</span>
+                <span className="text-[#2a1f15] font-semibold tabular-nums">{value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* How to Play */}
       <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
