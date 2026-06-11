@@ -9,6 +9,7 @@ const GAMES = [
   { id: 'cg' as GameId, name: 'CocktailGuessr',  description: "Guess today's cocktail",               url: 'https://cocktailguessr.app',       emoji: '🍹' },
   { id: 'pl' as GameId, name: 'Palette',          description: "Match today's colour with sliders",   url: 'https://palette.stoop.games',      emoji: '🎨' },
   { id: 'sl' as GameId, name: 'Sortl',            description: 'Sort the tubes by colour',             url: 'https://sortl.stoop.games',        emoji: '🧪' },
+  { id: 'hl' as GameId, name: 'Higher/Lower',     description: 'Which country stat is higher?',        url: 'https://higher.stoop.games',       emoji: '↕️' },
 ]
 
 const ARROW_CSS = `

@@ -97,45 +97,62 @@ export default function Sidebar({ levelN, onLevelSelect, mode, isNewUser = false
         </div>
       )}
 
-      {/* Levels grid — levels only */}
+      {/* Level nav — levels only */}
       {mode === 'levels' && (
         <div className="px-5 py-4 border-b border-[rgba(42,31,21,0.18)] shrink-0">
-          <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Levels</h2>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(10, 14px)",
-            gap: 3,
-            maxHeight: 200,
-            overflowY: "auto",
-          }}>
-            {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
-              const isDone = doneLevels.has(n);
-              const isCurrent = n === levelN;
-              return (
-                <button
-                  key={n}
-                  onClick={() => onLevelSelect(n)}
-                  title={`Level ${n}${isDone ? " ✓" : isCurrent ? " (current)" : ""}`}
-                  style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: 3,
-                    background: (isDone || isCurrent) ? "#c45a3a" : "rgba(42,31,21,0.1)",
-                    opacity: (isCurrent && !isDone) ? 0.5 : 1,
-                    outline: isCurrent ? "2px solid #c45a3a" : "none",
-                    outlineOffset: 1,
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    flexShrink: 0,
-                  }}
-                />
-              );
-            })}
+          <h2 className="text-[#8a7355] text-xs font-semibold uppercase tracking-widest mb-3 font-mono">Level</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={() => levelN > 1 && onLevelSelect(levelN - 1)}
+              disabled={levelN <= 1}
+              aria-label="Previous level"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 22, color: '#8a7355',
+                opacity: levelN <= 1 ? 0.2 : 0.55,
+                background: 'none', border: 'none',
+                cursor: levelN <= 1 ? 'default' : 'pointer',
+                padding: '0 2px', lineHeight: 1,
+                transition: 'opacity 150ms ease, color 150ms ease',
+                flexShrink: 0,
+              }}
+            >‹</button>
+
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <div style={{
+                fontFamily: "'Caprasimo', serif",
+                fontSize: 36, color: '#2a1f15', lineHeight: 1,
+              }}>
+                {levelN}
+              </div>
+              <div style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 9, color: doneLevels.has(levelN) ? '#c45a3a' : '#8a7355',
+                textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 5,
+              }}>
+                {doneLevels.has(levelN) ? 'completed ✓' : `of ${TOTAL_LEVELS}`}
+              </div>
+            </div>
+
+            <button
+              onClick={() => levelN < TOTAL_LEVELS && onLevelSelect(levelN + 1)}
+              disabled={levelN >= TOTAL_LEVELS}
+              aria-label="Next level"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 22, color: '#8a7355',
+                opacity: levelN >= TOTAL_LEVELS ? 0.2 : 0.55,
+                background: 'none', border: 'none',
+                cursor: levelN >= TOTAL_LEVELS ? 'default' : 'pointer',
+                padding: '0 2px', lineHeight: 1,
+                transition: 'opacity 150ms ease, color 150ms ease',
+                flexShrink: 0,
+              }}
+            >›</button>
           </div>
-          <p className="text-xs mt-2 font-mono">
-            <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
-            <span style={{ color: "#8a7355" }}> / {TOTAL_LEVELS} completed</span>
+          <p className="text-xs mt-3 font-mono text-center">
+            <span style={{ color: '#c45a3a' }}>{doneLevels.size}</span>
+            <span style={{ color: '#8a7355' }}> / {TOTAL_LEVELS} completed</span>
           </p>
         </div>
       )}

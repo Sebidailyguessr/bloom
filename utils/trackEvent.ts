@@ -1,4 +1,4 @@
-export type GameId = 'dg' | 'fg' | 'cg' | 'pl' | 'bl' | 'sl'
+export type GameId = 'dg' | 'fg' | 'cg' | 'pl' | 'bl' | 'sl' | 'hl'
 
 export type TrackEventName =
   | 'puzzle_started'

@@ -57,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <li><a href="https://cocktailguessr.app" style={{ fontFamily: 'var(--serif, Georgia, serif)', fontSize: 14, color: '#5a4632', textDecoration: 'none' }}>CocktailGuessr</a></li>
             <li><a href="https://palette.stoop.games" style={{ fontFamily: 'var(--serif, Georgia, serif)', fontSize: 14, color: '#5a4632', textDecoration: 'none' }}>Palette</a></li>
             <li><a href="https://sortl.stoop.games" style={{ fontFamily: 'var(--serif, Georgia, serif)', fontSize: 14, color: '#5a4632', textDecoration: 'none' }}>Sortl</a></li>
+            <li><a href="https://higher.stoop.games/" style={{ fontFamily: 'var(--serif, Georgia, serif)', fontSize: 14, color: '#5a4632', textDecoration: 'none' }}>Higher/Lower</a></li>
           </ul>
         </nav>
         <Script
