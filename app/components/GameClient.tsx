@@ -10,6 +10,10 @@ import MoveCounter from "./MoveCounter";
 import ResultsOverlay from "./ResultsOverlay";
 
 type Mode = "daily" | "levels";
+type LevelSubState = "select" | "playing";
+
+const TOTAL_LEVELS = 300;
+const mono = "'JetBrains Mono', ui-monospace, monospace";
 
 interface Props {
   levelN: number;
@@ -61,6 +65,8 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
   const [bestScore, setBestScore] = useState(0);
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [levelsBest, setLevelsBest] = useState(0);
+  const [levelSubState, setLevelSubState] = useState<LevelSubState>("playing");
+  const [doneLevels, setDoneLevels] = useState<Set<number>>(new Set());
 
   const stateRef = useRef({
     grid, territory, moves, par, mode, gameOver, animating,
@@ -81,6 +87,12 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
     setBestScore(parseInt(localStorage.getItem(LS.bestScore) || "0"));
     setGamesPlayed(parseInt(localStorage.getItem(LS.gamesPlayed) || "0"));
     setLevelsBest(parseInt(localStorage.getItem(LS.levelsBest) || "0"));
+
+    const done = new Set<number>();
+    for (let n = 1; n <= TOTAL_LEVELS; n++) {
+      if (localStorage.getItem(LS.levelDone(n)) === "true") done.add(n);
+    }
+    setDoneLevels(done);
 
     const key = getTodayKey();
     const saved = localStorage.getItem(LS.state(key));
@@ -209,6 +221,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         const newLevelsBest = Math.max(s.levelsBest, score);
         localStorage.setItem(LS.levelsBest, String(newLevelsBest));
         setLevelsBest(newLevelsBest);
+        setDoneLevels(prev => new Set(prev).add(s.levelN));
         s.onLevelWin?.();
       }
 
@@ -228,6 +241,7 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
     localStorage.removeItem(LS.levelDone(levelN));
     localStorage.removeItem(LS.levelMoves(levelN));
     localStorage.removeItem(LS.levelBest(levelN));
+    setDoneLevels(prev => { const next = new Set(prev); next.delete(levelN); return next; });
     const baseGrid = getLevelGrid(levelN);
     setGrid(baseGrid);
     setTerritory(new Set<string>(["0-0"]));
@@ -257,13 +271,17 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         borderRadius: 8,
         overflow: "hidden",
         border: "1px dashed rgba(42,31,21,0.18)",
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontFamily: mono,
         fontSize: 11,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
       }}>
         {(["daily", "levels"] as Mode[]).map(m => (
-          <button key={m} onClick={() => { setMode(m); onModeChange?.(m); }} style={{
+          <button key={m} onClick={() => {
+            setMode(m);
+            onModeChange?.(m);
+            if (m === "levels") setLevelSubState("select");
+          }} style={{
             padding: "8px 20px",
             background: mode === m ? "var(--terracotta, #c45a3a)" : "transparent",
             color: mode === m ? "#fff" : "var(--ink-soft, #5a4632)",
@@ -274,83 +292,126 @@ export default function GameClient({ levelN, onLevelChange, onLevelWin, onModeCh
         ))}
       </div>
 
-      {/* Puzzle label */}
-      <div style={{
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: 11,
-        color: "var(--ink-faded, #8a7355)",
-        letterSpacing: "0.1em",
-        textTransform: "uppercase",
-      }}>
-        {mode === "daily"
-          ? `Bloom #${String(getPuzzleNumber()).padStart(3, "0")}`
-          : `Level #${String(levelN).padStart(3, "0")}`}
-      </div>
-
-      <GameGrid
-        grid={grid}
-        territory={territory}
-        newCells={newCells.size > 0 ? newCells : undefined}
-        winPhase={winPhase}
-      />
-
-      <MoveCounter moves={moves} par={par} gameOver={gameOver} />
-
-      <ColorPicker
-        currentColor={currentColor}
-        onPick={handleMove}
-        disabled={gameOver || animating}
-      />
-
-      {gameOver && !showResults && (
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-          <button
-            onClick={() => setShowResults(true)}
-            style={{
-              padding: "10px 22px",
-              background: "transparent",
-              color: "var(--ink-soft, #5a4632)",
-              border: "1px dashed rgba(42,31,21,0.3)",
-              borderRadius: 8,
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: 11,
-              textTransform: "uppercase",
-              letterSpacing: "0.18em",
-              cursor: "pointer",
-            }}
-          >📊 Results</button>
-          {mode === "levels" && (
-            <button
-              onClick={() => { setShowResults(false); onLevelChange(levelN + 1); }}
-              style={{
-                padding: "10px 22px",
-                background: "var(--terracotta, #c45a3a)",
-                color: "white",
-                border: "none",
-                borderRadius: 8,
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: 11,
-                textTransform: "uppercase",
-                letterSpacing: "0.18em",
-                cursor: "pointer",
-              }}
-            >Next Level →</button>
-          )}
+      {/* Level select grid — levels + select */}
+      {mode === "levels" && levelSubState === "select" && (
+        <div style={{ width: "100%", maxWidth: 480 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
+            {Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1).map(n => {
+              const completed = doneLevels.has(n);
+              const isCurrent = n === levelN;
+              return (
+                <button
+                  key={n}
+                  onClick={() => { onLevelChange(n); setLevelSubState("playing"); }}
+                  title={`Level ${n}${completed ? " ✓" : isCurrent ? " (current)" : ""}`}
+                  style={{
+                    borderRadius: 8,
+                    padding: "10px 0 8px",
+                    fontFamily: mono, fontSize: 12,
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                    background: completed ? "#c45a3a" : "transparent",
+                    color: completed ? "#f3e9d6" : isCurrent ? "#c45a3a" : "#2a1f15",
+                    border: completed ? "none"
+                      : isCurrent ? "1.5px solid #c45a3a"
+                      : "1.5px solid rgba(42,31,21,0.15)",
+                    cursor: "pointer",
+                    transition: "background 150ms, color 150ms",
+                  }}
+                >
+                  <span style={{ fontWeight: 600 }}>{n}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p style={{ fontFamily: mono, fontSize: 11, color: "#8a7355", marginTop: 16, textAlign: "center" }}>
+            <span style={{ color: "#c45a3a" }}>{doneLevels.size}</span>
+            {" / "}{TOTAL_LEVELS} completed
+          </p>
         </div>
       )}
 
-      {showResults && (
-        <ResultsOverlay
-          moves={moves}
-          par={par}
-          puzzleNumber={mode === "daily" ? getPuzzleNumber() : levelN}
-          mode={mode}
-          onClose={() => setShowResults(false)}
-          onNextLevel={mode === "levels"
-            ? () => { setShowResults(false); onLevelChange(levelN + 1); }
-            : undefined}
-          onPlayAgain={mode === "levels" ? handlePlayAgain : undefined}
-        />
+      {/* Game — daily mode OR levels+playing */}
+      {(mode === "daily" || levelSubState === "playing") && (
+        <>
+          {/* Puzzle label */}
+          <div style={{
+            fontFamily: mono,
+            fontSize: 11,
+            color: "var(--ink-faded, #8a7355)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}>
+            {mode === "daily"
+              ? `Bloom #${String(getPuzzleNumber()).padStart(3, "0")}`
+              : `Level #${String(levelN).padStart(3, "0")}`}
+          </div>
+
+          <GameGrid
+            grid={grid}
+            territory={territory}
+            newCells={newCells.size > 0 ? newCells : undefined}
+            winPhase={winPhase}
+          />
+
+          <MoveCounter moves={moves} par={par} gameOver={gameOver} />
+
+          <ColorPicker
+            currentColor={currentColor}
+            onPick={handleMove}
+            disabled={gameOver || animating}
+          />
+
+          {gameOver && !showResults && (
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                onClick={() => setShowResults(true)}
+                style={{
+                  padding: "10px 22px",
+                  background: "transparent",
+                  color: "var(--ink-soft, #5a4632)",
+                  border: "1px dashed rgba(42,31,21,0.3)",
+                  borderRadius: 8,
+                  fontFamily: mono,
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.18em",
+                  cursor: "pointer",
+                }}
+              >📊 Results</button>
+              {mode === "levels" && (
+                <button
+                  onClick={() => { setShowResults(false); onLevelChange(levelN + 1); }}
+                  style={{
+                    padding: "10px 22px",
+                    background: "var(--terracotta, #c45a3a)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 8,
+                    fontFamily: mono,
+                    fontSize: 11,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.18em",
+                    cursor: "pointer",
+                  }}
+                >Next Level →</button>
+              )}
+            </div>
+          )}
+
+          {showResults && (
+            <ResultsOverlay
+              moves={moves}
+              par={par}
+              puzzleNumber={mode === "daily" ? getPuzzleNumber() : levelN}
+              mode={mode}
+              onClose={() => setShowResults(false)}
+              onNextLevel={mode === "levels"
+                ? () => { setShowResults(false); onLevelChange(levelN + 1); }
+                : undefined}
+              onPlayAgain={mode === "levels" ? handlePlayAgain : undefined}
+            />
+          )}
+        </>
       )}
     </div>
   );
